@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DDoS Live Monitor</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>🛡️ DDoS Live Monitor</h1>
+    <div class="status">
+      <span id="dot" class="dot"></span>
+      <span id="status-text">connecting…</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Producer controls -->
+    <section class="card control-card">
+      <div class="chart-head">
+        <div class="label">Traffic Source</div>
+        <div class="tabs" id="mode-tabs">
+          <button data-mode="synthetic" class="tab active">Synthetic</button>
+          <button data-mode="live" class="tab">Live</button>
+        </div>
+      </div>
+
+      <div id="form-synthetic" class="form">
+        <div class="row">
+          <label class="field">
+            <span>Attack Class</span>
+            <select id="in-attack-type">
+              <option value="drdos_dns" selected>DRDoS DNS (Amplification Flood)</option>
+              <option value="drdos_ntp">DRDoS NTP (Monlist Amplification)</option>
+              <option value="drdos_mssql">DRDoS MSSQL</option>
+              <option value="drdos_udp">DRDoS UDP Flood</option>
+              <option value="tftp">TFTP Amplification</option>
+              <option value="syn">TCP SYN Flood</option>
+              <option value="drdos_ldap">LDAP Flood</option>
+              <option value="mixed">Mixed Traffic (All Types)</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Total flows</span>
+            <input id="in-total" type="number" min="1" max="100000" value="500" />
+          </label>
+          <label class="field">
+            <span>Attack ratio · <b id="ratio-out">30%</b>
+              <em id="ratio-count">(≈150 attacks, 350 benign)</em></span>
+            <input id="in-ratio" type="range" min="0" max="100" value="30" />
+          </label>
+          <label class="field">
+            <span>Rate · <b id="rate-out">10</b> flows/s</span>
+            <input id="in-rate" type="range" min="1" max="100" value="10" />
+          </label>
+        </div>
+      </div>
+
+      <div id="form-live" class="form hidden">
+        <div class="row">
+          <label class="field" style="grid-column: 1 / -1;">
+            <span>Capture Interface</span>
+            <select id="in-iface">
+              <option value="\Device\NPF_Loopback" selected>Loopback (\Device\NPF_Loopback - 127.0.0.1)</option>
+              <option value="auto">Auto-Detect Primary Adapter</option>
+            </select>
+          </label>
+        </div>
+        <p class="hint">
+          <b>Windows Note:</b> Real-time packet capture uses Npcap. If Npcap is in <i>Admin-only mode</i>, start your terminal with <b>"Run as Administrator"</b>. For local attack testing (e.g. <code>tools/syn_flood.py</code>), select <b>Loopback</b>.
+        </p>
+      </div>
+
+      <div class="actions">
+        <button id="btn-start" class="btn primary">Start</button>
+        <button id="btn-stop"  class="btn" disabled>Stop</button>
+      </div>
+      <div id="control-msg" class="hint"></div>
+    </section>
+
+    <!-- KPIs -->
+    <section class="kpis">
+      <div class="card">
+        <div class="label">Latest Flow</div>
+        <div id="kpi-latest" class="value">—</div>
+      </div>
+      <div class="card">
+        <div class="label">Confidence</div>
+        <div id="kpi-conf" class="value">—</div>
+      </div>
+      <div class="card">
+        <div class="label">Detected Attack Share</div>
+        <div id="kpi-share" class="value">—</div>
+      </div>
+      <div class="card">
+        <div class="label">Recent Accuracy
+          <span id="acc-badge" class="badge hidden">labeled</span>
+        </div>
+        <div id="kpi-acc" class="value">—</div>
+      </div>
+    </section>
+
+    <!-- Chart -->
+    <section class="card chart-card">
+      <div class="chart-head">
+        <div class="label">Attack probability (rolling)</div>
+        <button id="pause-btn" class="btn">Pause</button>
+      </div>
+      <div class="chart-wrap"><canvas id="chart"></canvas></div>
+    </section>
+
+    <!-- Log -->
+    <section class="card">
+      <div class="chart-head">
+        <div class="label">Recent flows</div>
+        <select id="filter">
+          <option value="all">All</option>
+          <option value="ATTACK">Attack only</option>
+          <option value="SAFE">Safe only</option>
+        </select>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th><th>Result</th><th>Confidence</th>
+            <th>True label</th><th>Source</th><th>Destination</th>
+          </tr>
+        </thead>
+        <tbody id="log"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

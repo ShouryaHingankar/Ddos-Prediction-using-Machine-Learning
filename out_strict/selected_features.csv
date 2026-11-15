@@ -1,0 +1,21 @@
+feature
+bwd packets/s
+urg flag count
+fwd packet length min
+bwd packet length max
+bwd packet length mean
+init fwd win bytes
+down/up ratio
+packet length mean
+init bwd win bytes
+fwd packets length total
+fwd packet length max
+flow iat std
+idle std
+packet length std
+flow packets/s
+packet length max
+flow iat mean
+ack flag count
+total fwd packets
+fwd psh flags

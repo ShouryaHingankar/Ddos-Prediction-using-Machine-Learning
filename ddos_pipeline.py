@@ -5,7 +5,8 @@ CIC-DDoS2019: sample -> clean -> reduce features -> train/compare -> report.
 Usage:
   python ddos_pipeline.py --data_dir data/train                      # random split
   python ddos_pipeline.py --data_dir data/train --test_dir data/test # train-day vs test-day
-Options: --frac 0.2 --max_per_label 20000 --topk 20 --out out
+  python ddos_pipeline.py ... --adapt 0.1   # also train on 10% of test-day flows, score on the rest
+Defaults use 100% of the rows (--frac 1.0) with no per-label cap. Options: --frac --max_per_label --topk --adapt --out
 """
 import argparse, glob, os, time
 import joblib
@@ -106,9 +107,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data_dir", required=True)
     ap.add_argument("--test_dir")
-    ap.add_argument("--frac", type=float, default=0.2)
-    ap.add_argument("--max_per_label", type=int, default=20_000)
+    ap.add_argument("--frac", type=float, default=1.0, help="share of rows to use (1.0 = 100%)")
+    ap.add_argument("--max_per_label", type=int, default=10**9, help="cap per label (default: no cap)")
     ap.add_argument("--topk", type=int, default=20)
+    ap.add_argument("--adapt", type=float, default=0.0,
+                    help="with --test_dir: move this fraction of test-day flows into training (rest = test)")
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--out", default="out")
     a = ap.parse_args()
@@ -117,6 +120,10 @@ def main():
     data = prepare(a.data_dir, a.frac, a.max_per_label, a.seed)
     if a.test_dir:
         tr, te = data, prepare(a.test_dir, a.frac, a.max_per_label, a.seed)
+        if a.adapt > 0:
+            ad, te = train_test_split(te, train_size=a.adapt, random_state=a.seed, stratify=te.label)
+            tr = pd.concat([tr, ad], ignore_index=True)
+            print(f"ADAPTATION: added {len(ad)} test-day flows to training; scoring on the other {len(te)}")
     else:
         tr, te = train_test_split(data, test_size=0.3, random_state=a.seed,
                                   stratify=(data.label != "benign"))

@@ -1,21 +1,21 @@
 feature
-bwd packet length max
 urg flag count
-fwd packet length min
-fwd act data packets
+bwd packet length max
 bwd packets/s
-bwd packet length mean
+fwd act data packets
 init bwd win bytes
-init fwd win bytes
-flow iat std
-packet length mean
-ack flag count
-fwd packets length total
+fwd packet length min
+bwd packet length mean
 down/up ratio
-flow iat mean
-flow packets/s
-flow bytes/s
-total backward packets
-packet length std
-packet length max
+init fwd win bytes
+fwd packets length total
 fwd packet length max
+flow bytes/s
+packet length variance
+total backward packets
+total fwd packets
+packet length std
+flow iat std
+flow iat mean
+fwd psh flags
+bwd header length
