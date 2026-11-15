@@ -1,0 +1,12 @@
+label,recall,n_test
+drdos_dns,0.9405,756
+drdos_ldap,0.9896,288
+drdos_mssql,1.0,1244
+drdos_netbios,0.9701,134
+drdos_ntp,0.9959,24235
+drdos_snmp,1.0,560
+drdos_udp,0.9995,2104
+syn,0.0,109
+tftp,0.9972,19759
+udp-lag,0.2434,1820
+webddos,0.0,14
